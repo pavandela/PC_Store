@@ -14,6 +14,7 @@ COLORS = {
 }
 
 # Decorator to color the output of a function
+#It wraps the Function and adds any chosen color to whatever text it returns.
 def color_deco(color: str):
     def decorator(func):
         @wraps(func)
@@ -24,7 +25,9 @@ def color_deco(color: str):
         return wrapper
     return decorator
 
-# FileHandler class for general file operations
+# A class to manage text files ,read them and combine them and display
+#__init__ run to create objects in the file
+#it sets the filename to property
 class FileHandler:
     def __init__(self, filename: str):
         # Set the filename (triggers the setter for validation)
@@ -34,7 +37,7 @@ class FileHandler:
     def filename(self):
         # Getter for filename
         return self._filename
-
+# it reads filenames in txt if someone saved files as pdf then it displays an error
     @filename.setter
     def filename(self, value):
         # Ensure the file is a .txt file
@@ -51,12 +54,12 @@ class FileHandler:
         except FileNotFoundError:
             yield from []  # If file not found, yield nothing
 
-    # String representation, colored blue
+    # String representation, it take color blue and out the formated string(Filename.txt) in blue 
     @color_deco("blue")
     def __str__(self):
         return f"FileHandler for {self._filename}"
 
-    # Add two FileHandler objects by concatenating their contents
+    # Add two FileHandler objects by concatenating their contents and combines lines with newlines 
     def __add__(self, other):
         content1 = '\n'.join(list(self.read_generator()))
         content2 = '\n'.join(list(other.read_generator()))
@@ -65,18 +68,24 @@ class FileHandler:
     @staticmethod
     def concat_files(*files):
         return '\n'.join('\n'.join(list(f.read_generator())) for f in files)
-    # Class method to create a file from a list of strings
+    
+    # Class method to create a filein txt from a list of strings and 
+    #returns a filehandler object for that new file
+    
     @classmethod
     def create_from_list(cls, data: list, filename: str):
         with open(filename, 'w') as file:
             file.write('\n'.join(data))
         return cls(filename) 
 # InventoryFileHandler extends FileHandler for inventory management
-class InventoryFileHandler(FileHandler):   #chld class for inventory management
+#calls parental constructor and loads inventory into a dictionary
+
+class InventoryFileHandler(FileHandler):   #child class for inventory management
     def __init__(self, filename: str):
         super().__init__(filename)  # Initialize parent class
         self.inventory = self._load_inventory()  # Load inventory from file
     # Load inventory from file into a dictionary
+   
     def _load_inventory(self):
         inventory = {}
         for line in self.read_generator():
@@ -85,6 +94,8 @@ class InventoryFileHandler(FileHandler):   #chld class for inventory management
                 inventory[item] = int(quantity)
         return inventory
     # Add inventories of two InventoryFileHandler objects
+    #combines 2 inventories :sum quantities of matching items
+    
     def __add__(self, other):
         combined = self.inventory.copy()
         for item, quantity in other.inventory.items():
